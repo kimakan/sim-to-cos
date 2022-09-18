@@ -7,15 +7,13 @@ from astropy.table import Table, Column, vstack
 from astropy.io import ascii, fits
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 HEII_LYA = 303.7822
 
 PATH_TO_LSF = "coslsf/"
 
 
 def get_options():
-    
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--sim-data', 
                         required=True,
@@ -46,7 +44,6 @@ def get_options():
                         required=True,
                         dest='cenwave',
                         help='HST/COS cenwave that shoud be used for mocks')
-
 
     return parser.parse_args()
 
@@ -98,7 +95,6 @@ def apply_lsf(wave, transmission, lsf):
     return convolve(np.array(transmission), np.array(selected_lsf), boundary='extend')
 
 
-
 def resample_sim_to_obs(obs_spec, sim_wave, sim_trans):
     """Resample the simulated transmission to the observed spectrum.
 
@@ -127,7 +123,7 @@ def resample_sim_to_obs(obs_spec, sim_wave, sim_trans):
             resampled_trans[i] = np.mean(sim_trans[sel_trans])
         else:
             resampled_trans[i] = 0.0
-        
+
     return resampled_trans
 
 
@@ -142,15 +138,15 @@ def make_mock(obs_spec, sim_data, grating, lp, cenwave):
     for sim_id in np.unique(sim_data['sim_id']):
         sim_data_chunk = sim_data[sim_data['sim_id']==sim_id]
         sim_data_chunk.sort('z')
-        
+
         trans = apply_lsf(wave=sim_data_chunk['WAVE'],
                           transmission=sim_data_chunk['TRANS'],
                           lsf=lsf)
-        
+
         trans_res = resample_sim_to_obs(obs_spec=obs_spec,
                                         sim_wave=sim_data_chunk['WAVE'],
                                         sim_trans=trans)
-        
+
         bkg_err = np.random.normal(0, np.sum(obs_spec['BKG_ERR_UP']))/len(obs_spec['BKG_ERR_UP'])
 
         if "CALIB_DERED" in obs_spec.colnames:
@@ -197,7 +193,6 @@ if __name__ == "__main__":
     mock_spectra = mocks[0]
     for mock in mocks[1:]:
         mock_spectra = vstack([mock_spectra, mock])
-
 
     mock_spectra.write(args.path_to_output, format='fits', overwrite=True)
 
